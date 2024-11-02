@@ -1,62 +1,58 @@
 const CategoryModel = require("../models/CategoryModel");
 const categoryValidation = require("../validations/categoryValidation");
 
-// Get all categories
-const getAllCategories = async (req, res) => {
+exports.getAllCategories = async (req, res) => {
   try {
-    const data = await CategoryModel.find();
-    res.status(200).send(data);
+    const categories = await CategoryModel.find();
+    res.status(200).json({
+      status: "success",
+      results: categories.length,
+      data: { categories },
+    });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Get a single category by ID
-const getCategory = async (req, res) => {
+exports.getCategory = async (req, res) => {
   try {
     const category = await CategoryModel.findById(req.params.id);
     if (!category) {
       return res
         .status(404)
-        .send({ status: false, message: "Category not found" });
+        .json({ status: "fail", message: "Category not found" });
     }
-    res.status(200).send({ status: true, data: category });
+    res.status(200).json({ status: "success", data: { category } });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Create a new category
-const createCategory = async (req, res) => {
+exports.createCategory = async (req, res) => {
   try {
     const { error } = categoryValidation(req.body);
-    if (error) {
+    if (error)
       return res
         .status(400)
-        .send({ status: false, message: error.message });
-    }
+        .json({ status: "fail", message: error.message });
 
-    const category = new CategoryModel(req.body);
-    await category.save();
-    res.status(200).send({
-      status: true,
-      message: "Category created successfully",
-      data: category,
+    const category = await CategoryModel.create(req.body);
+    res.status(201).json({
+      status: "success",
+      data: { category },
     });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Update a category by ID
-const updateCategory = async (req, res) => {
+exports.updateCategory = async (req, res) => {
   try {
     const { error } = categoryValidation(req.body);
-    if (error) {
+    if (error)
       return res
         .status(400)
-        .send({ status: false, message: error.message });
-    }
+        .json({ status: "fail", message: error.message });
 
     const category = await CategoryModel.findByIdAndUpdate(
       req.params.id,
@@ -70,21 +66,16 @@ const updateCategory = async (req, res) => {
     if (!category) {
       return res
         .status(404)
-        .send({ status: false, message: "Category not found" });
+        .json({ status: "fail", message: "Category not found" });
     }
 
-    res.status(200).send({
-      status: true,
-      message: "Category updated successfully",
-      data: category,
-    });
+    res.status(200).json({ status: "success", data: { category } });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Delete a category by ID
-const deleteCategory = async (req, res) => {
+exports.deleteCategory = async (req, res) => {
   try {
     const category = await CategoryModel.findByIdAndDelete(
       req.params.id
@@ -92,21 +83,10 @@ const deleteCategory = async (req, res) => {
     if (!category) {
       return res
         .status(404)
-        .send({ status: false, message: "Category not found" });
+        .json({ status: "fail", message: "Category not found" });
     }
-    res.status(200).send({
-      status: true,
-      message: "Category deleted successfully",
-    });
+    res.status(204).json({ status: "success", data: null });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
-};
-
-module.exports = {
-  getAllCategories,
-  getCategory,
-  createCategory,
-  updateCategory,
-  deleteCategory,
 };

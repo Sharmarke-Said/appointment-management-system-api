@@ -72,6 +72,7 @@ const signup = async (req, res) => {
 
 // User login
 const login = async (req, res) => {
+  console.log("Logged in");
   try {
     const { error } = loginValidation(req.body);
     if (error)
@@ -80,6 +81,8 @@ const login = async (req, res) => {
         .send({ status: false, message: error.message });
 
     const user = await UserModel.findOne({ email: req.body.email });
+
+    console.log("User logged in", user);
     if (
       !user ||
       !(await bcrypt.compare(req.body.password, user.password))

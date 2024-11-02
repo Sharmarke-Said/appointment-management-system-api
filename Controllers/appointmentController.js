@@ -1,20 +1,22 @@
 const AppointmentModel = require("../models/AppointmentModel");
 const appointmentValidation = require("../validations/appointmentValidation");
 
-// Get all appointments
-const getAllAppointments = async (req, res) => {
+exports.getAllAppointments = async (req, res) => {
   try {
-    const data = await AppointmentModel.find().populate(
+    const appointments = await AppointmentModel.find().populate(
       "userId categoryId"
     );
-    res.status(200).send(data);
+    res.status(200).json({
+      status: "success",
+      results: appointments.length,
+      data: { appointments },
+    });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Get a single appointment by ID
-const getAppointment = async (req, res) => {
+exports.getAppointment = async (req, res) => {
   try {
     const appointment = await AppointmentModel.findById(
       req.params.id
@@ -22,45 +24,41 @@ const getAppointment = async (req, res) => {
     if (!appointment) {
       return res
         .status(404)
-        .send({ status: false, message: "Appointment not found" });
+        .json({ status: "fail", message: "Appointment not found" });
     }
-    res.status(200).send({ status: true, data: appointment });
+    res
+      .status(200)
+      .json({ status: "success", data: { appointment } });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Create a new appointment
-const createAppointment = async (req, res) => {
+exports.createAppointment = async (req, res) => {
   try {
     const { error } = appointmentValidation(req.body);
-    if (error) {
+    if (error)
       return res
         .status(400)
-        .send({ status: false, message: error.message });
-    }
+        .json({ status: "fail", message: error.message });
 
-    const appointment = new AppointmentModel(req.body);
-    await appointment.save();
-    res.status(201).send({
-      status: true,
-      message: "Appointment created successfully",
-      data: appointment,
+    const appointment = await AppointmentModel.create(req.body);
+    res.status(201).json({
+      status: "success",
+      data: { appointment },
     });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Update an appointment by ID
-const updateAppointment = async (req, res) => {
+exports.updateAppointment = async (req, res) => {
   try {
     const { error } = appointmentValidation(req.body);
-    if (error) {
+    if (error)
       return res
         .status(400)
-        .send({ status: false, message: error.message });
-    }
+        .json({ status: "fail", message: error.message });
 
     const appointment = await AppointmentModel.findByIdAndUpdate(
       req.params.id,
@@ -74,21 +72,18 @@ const updateAppointment = async (req, res) => {
     if (!appointment) {
       return res
         .status(404)
-        .send({ status: false, message: "Appointment not found" });
+        .json({ status: "fail", message: "Appointment not found" });
     }
 
-    res.status(200).send({
-      status: true,
-      message: "Appointment updated successfully",
-      data: appointment,
-    });
+    res
+      .status(200)
+      .json({ status: "success", data: { appointment } });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
 };
 
-// Delete an appointment by ID
-const deleteAppointment = async (req, res) => {
+exports.deleteAppointment = async (req, res) => {
   try {
     const appointment = await AppointmentModel.findByIdAndDelete(
       req.params.id
@@ -96,21 +91,10 @@ const deleteAppointment = async (req, res) => {
     if (!appointment) {
       return res
         .status(404)
-        .send({ status: false, message: "Appointment not found" });
+        .json({ status: "fail", message: "Appointment not found" });
     }
-    res.status(200).send({
-      status: true,
-      message: "Appointment deleted successfully",
-    });
+    res.status(204).json({ status: "success", data: null });
   } catch (error) {
-    res.status(500).send({ status: false, message: error.message });
+    res.status(500).json({ status: "fail", message: error.message });
   }
-};
-
-module.exports = {
-  getAllAppointments,
-  getAppointment,
-  createAppointment,
-  updateAppointment,
-  deleteAppointment,
 };

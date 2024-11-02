@@ -12,6 +12,14 @@ const appointmentSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+    },
+    location: {
+      type: String,
+      required: true,
+    },
     date: {
       type: Date,
       required: true,
@@ -19,6 +27,11 @@ const appointmentSchema = new mongoose.Schema(
     time: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ["Pending", "Process", "Cancelled", "Completed"],
+      default: "pending",
     },
   },
   { timestamps: true }
